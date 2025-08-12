@@ -7,13 +7,14 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     email: {
         type: String,
         required: true,
-        unique:true,
-        lowercase:true
+        unique: true,
+        lowercase: true
     },
     password: {
         type: String,
