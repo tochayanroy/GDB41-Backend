@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../modules/userSchema')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
-
+const { singleFileUplaod } = require('../middleware/multer')
 
 
 router.post('/register', async (req, res) => {
@@ -73,12 +73,40 @@ router.post('/login', async (req, res) => {
 
 
 
-router.get('/profile', passport.authenticate('jwt', {session:false}), async (req, res) => {
+router.get('/profile', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
 
         const user = await User.findById(req.user.id).select('-password')
 
         res.status(200).json({ user })
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server Error" })
+    }
+})
+
+
+
+
+
+
+router.post('/uploadProfilePic', passport.authenticate('jwt', { session: false }), singleFileUplaod, async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(400).json({ message: "User not exist" })
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: "No file Uploaded" })
+        }
+
+        user.image = req.file.path;
+        await user.save();
+
+        res.status(200).json({ message: "Profile Picture Upload Successfully" })
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Server Error" })
